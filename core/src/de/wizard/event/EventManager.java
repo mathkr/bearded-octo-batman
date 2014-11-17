@@ -35,7 +35,7 @@ public class EventManager {
                 pendingEventsQueue.begin();
                 for (int i = 0; i < pendingEventsQueue.size; ++i) {
                         EventEntry eventEntry = pendingEventsQueue.get(i);
-                        long eventType = eventEntry.event.getType();
+                        int eventType = eventEntry.type;
                         boolean process =
                                 !eventEntry.timed || TimeUtils.timeSinceMillis(eventEntry.originTime) >= eventEntry.waitTime;
 
@@ -57,6 +57,7 @@ public class EventManager {
 
                                 if (eventEntry.dispatchCounter == 0) {
                                         pendingEventsQueue.removeIndex(i);
+                                        Pools.free(eventEntry.event);
                                         Pools.free(eventEntry);
                                 } else if (eventEntry.timed) {
                                         eventEntry.originTime = TimeUtils.millis();
@@ -66,17 +67,18 @@ public class EventManager {
                 pendingEventsQueue.end();
         }
 
-        public void dispatchEvent(Event event, int receiver) {
+        public void dispatchEvent(int type, Event event, int receiver) {
                 EventEntry entry = Pools.obtain(EventEntry.class);
 
                 entry.event = event;
                 entry.receiverId = receiver;
                 entry.dispatchCounter = 1;
+                entry.type = type;
 
                 pendingEventsQueue.add(entry);
         }
 
-        public void dispatchTimedEvent(Event event, int receiver, int waitTime) {
+        public void dispatchTimedEvent(int type, Event event, int receiver, int waitTime) {
                 EventEntry entry = Pools.obtain(EventEntry.class);
 
                 entry.originTime = TimeUtils.millis();
@@ -85,11 +87,12 @@ public class EventManager {
                 entry.timed = true;
                 entry.waitTime = waitTime;
                 entry.dispatchCounter = 1;
+                entry.type = type;
 
                 pendingEventsQueue.add(entry);
         }
 
-        public void dispatchTimedRecurringEvent(Event event, int receiver, int waitTime, int dispatchCounter) {
+        public void dispatchTimedRecurringEvent(int type, Event event, int receiver, int waitTime, int dispatchCounter) {
                 EventEntry entry = Pools.obtain(EventEntry.class);
 
                 entry.originTime = TimeUtils.millis();
@@ -98,16 +101,18 @@ public class EventManager {
                 entry.timed = true;
                 entry.waitTime = waitTime;
                 entry.dispatchCounter = dispatchCounter;
+                entry.type = type;
 
                 pendingEventsQueue.add(entry);
         }
 
-        public void dispatchGlobalEvent(Event event) {
+        public void dispatchGlobalEvent(int type, Event event) {
                 EventEntry entry = Pools.obtain(EventEntry.class);
 
                 entry.event = event;
                 entry.global = true;
                 entry.dispatchCounter = 1;
+                entry.type = type;
 
                 pendingEventsQueue.add(entry);
         }
@@ -116,6 +121,7 @@ public class EventManager {
                 public Event event;
                 public boolean global;
                 public int receiverId;
+                public int type;
 
                 public boolean timed;
                 public int waitTime;
@@ -126,7 +132,7 @@ public class EventManager {
                 public void reset() {
                         event = null;
                         global = timed = false;
-                        originTime = waitTime = receiverId = dispatchCounter = 0;
+                        originTime = type = waitTime = receiverId = dispatchCounter = 0;
                 }
         }
 }

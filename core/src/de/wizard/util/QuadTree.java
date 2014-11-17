@@ -55,14 +55,14 @@ public class QuadTree<T extends Circle> {
                  *     +      +      +
                  *     +======+======+
                  */
-                public Node[] nodes;
+                public Array<Node> nodes;
 
                 Node(int depth, Rectangle bounds) {
                         this.depth  = depth;
                         this.bounds = bounds;
                         this.center = bounds.getCenter(new Vector2());
                         this.bucket = new Array<>(MAX_BUCKET_SIZE);
-                        this.nodes  = (Node[]) new Object[4];
+                        this.nodes  = new Array<>(4);
                 }
 
                 public boolean insert(T elem) {
@@ -72,10 +72,10 @@ public class QuadTree<T extends Circle> {
                                 bucket.add(elem);
                                 return true;
                         } else {
-                                if (nodes[0] == null) subdivide();
+                                if (nodes.size == 0) subdivide();
 
                                 int index = getIndex(elem.x, elem.y);
-                                boolean res = nodes[index].insert(elem);
+                                boolean res = nodes.get(index).insert(elem);
 
                                 if (!res) {
                                         bucket.add(elem);
@@ -103,10 +103,10 @@ public class QuadTree<T extends Circle> {
 
                         int d = depth + 1;
 
-                        nodes[0] = new Node(d, sw);
-                        nodes[1] = new Node(d, se);
-                        nodes[2] = new Node(d, nw);
-                        nodes[3] = new Node(d, ne);
+                        nodes.add(new Node(d, sw));
+                        nodes.add(new Node(d, se));
+                        nodes.add(new Node(d, nw));
+                        nodes.add(new Node(d, ne));
 
                         Array<T> elements = new Array<>(bucket);
                         bucket.clear();
@@ -118,7 +118,7 @@ public class QuadTree<T extends Circle> {
                         res.addAll(bucket);
 
                         for (Node node : nodes) {
-                                if (node != null && node.bounds.overlaps(range)) {
+                                if (node.bounds.overlaps(range)) {
                                         node.getRange(range, res);
                                 }
                         }
@@ -129,12 +129,11 @@ public class QuadTree<T extends Circle> {
                 public void clear() {
                         bucket.clear();
 
-                        for (int i = 0; i < nodes.length; ++i) {
-                                if (nodes[i] != null) {
-                                        nodes[i].clear();
-                                        nodes[i] = null;
-                                }
+                        for (Node node : nodes) {
+                                node.clear();
                         }
+
+                        nodes.clear();
                 }
 
                 private int getIndex(float x, float y) {
@@ -149,7 +148,7 @@ public class QuadTree<T extends Circle> {
                         bucket.removeValue(elem, true);
 
                         int index = getIndex(elem.x, elem.y);
-                        if (nodes[index] != null) nodes[index].remove(elem);
+                        if (nodes.size > 0) nodes.get(index).remove(elem);
                 }
         }
 }
