@@ -13,14 +13,12 @@ import de.wizard.util.QuadTree;
 public class Scene {
         public DelayedRemovalArray<Actor> actors;
         public QuadTree<Actor> tree;
-
-        public MovingActor player;
+        public PhysicsActor player;
+        public Rectangle bounds;
 
         public final float GRAVITY = 9.81f;
 
         public float delta = 0f;
-
-        public Rectangle bounds;
 
         public Scene() {
                 actors = new DelayedRemovalArray<>();
@@ -28,7 +26,7 @@ public class Scene {
 
                 tree = new QuadTree<>(bounds);
 
-                player = Pools.obtain(MovingActor.class);
+                player = Pools.obtain(PhysicsActor.class);
                 player.set(1, 1, 4, 50, 40);
 
                 actors.add(player);
@@ -51,6 +49,9 @@ public class Scene {
                 actors.end();
         }
 
+        /*
+         * Eventually return different friction coefficients depending on the surface.
+         */
         public float getFriction(float x, float y, float v) {
                 return v > 0.001f ? 0.8f : 1.0f;
         }

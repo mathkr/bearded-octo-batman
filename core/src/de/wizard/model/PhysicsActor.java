@@ -5,7 +5,7 @@ import de.wizard.Main;
 import de.wizard.event.Event;
 import de.wizard.event.VectorEvent;
 
-public class MovingActor extends Actor {
+public class PhysicsActor extends Actor {
         private Vector2 velocity;
         private Vector2 force;
         private Vector2 acceleration;
@@ -13,7 +13,7 @@ public class MovingActor extends Actor {
         private float mass;
         private float friction;
 
-        public MovingActor() {
+        public PhysicsActor() {
                 velocity = new Vector2();
                 force = new Vector2();
                 acceleration = new Vector2();
@@ -27,14 +27,18 @@ public class MovingActor extends Actor {
         protected void move() {
                 float delta = Main.scene.delta;
 
+                /* Apply accumulated forces */
                 acceleration.x = force.x / mass;
                 acceleration.y = force.y / mass;
 
+                /* Reset force vector */
                 force.setZero();
 
+                /* Apply acceleration */
                 velocity.x += acceleration.x * 0.5f * delta;
                 velocity.y += acceleration.y * 0.5f * delta;
 
+                /* Apply friction */
                 float vel_len = velocity.len();
                 float mu = friction * Main.scene.getFriction(x, y, vel_len);
                 float friction_len = mu * Main.scene.GRAVITY * delta;
@@ -46,6 +50,7 @@ public class MovingActor extends Actor {
                         velocity.y -= velocity.y / vel_len * friction_len;
                 }
 
+                /* Calculate new position */
                 x += velocity.x * delta;
                 y += velocity.y * delta;
         }
