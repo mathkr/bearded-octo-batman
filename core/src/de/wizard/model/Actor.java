@@ -7,7 +7,7 @@ import de.wizard.event.EventListener;
 import de.wizard.event.EventManager;
 
 public abstract class Actor extends Circle implements EventListener, Poolable {
-        private int listenerId = EventManager.getId();
+        private int listenerId = EventManager.getListenerId();
 
         public abstract void update();
 

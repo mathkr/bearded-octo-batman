@@ -5,7 +5,7 @@ import de.wizard.Main;
 import de.wizard.event.Event;
 import de.wizard.event.VectorEvent;
 
-public class PhysicsActor extends Actor {
+public class PhysicalActor extends Actor {
         private Vector2 velocity;
         private Vector2 force;
         private Vector2 acceleration;
@@ -13,7 +13,7 @@ public class PhysicsActor extends Actor {
         private float mass;
         private float friction;
 
-        public PhysicsActor() {
+        public PhysicalActor() {
                 velocity = new Vector2();
                 force = new Vector2();
                 acceleration = new Vector2();

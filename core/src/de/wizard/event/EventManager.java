@@ -14,7 +14,7 @@ public class EventManager {
                 pendingEventsQueue = new DelayedRemovalArray<>();
         }
 
-        public static int getId() {
+        public static int getListenerId() {
                 return nextId++;
         }
 
@@ -29,9 +29,6 @@ public class EventManager {
         public void processEvents() {
                 pendingEventsQueue.begin();
                 for (EventEntry entry : pendingEventsQueue) {
-                        boolean process = entry.waitTime == 0
-                                || TimeUtils.timeSinceMillis(entry.originTime) >= entry.waitTime;
-
                         if (entry.waitTime == 0 || TimeUtils.timeSinceMillis(entry.originTime) >= entry.waitTime) {
                                 EventListener receiver = eventListener.get(entry.receiverId);
 

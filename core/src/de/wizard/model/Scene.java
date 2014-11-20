@@ -13,7 +13,7 @@ import de.wizard.util.QuadTree;
 public class Scene {
         public DelayedRemovalArray<Actor> actors;
         public QuadTree<Actor> tree;
-        public PhysicsActor player;
+        public PhysicalActor player;
         public Rectangle bounds;
 
         public final float GRAVITY = 9.81f;
@@ -26,7 +26,7 @@ public class Scene {
 
                 tree = new QuadTree<>(bounds);
 
-                player = Pools.obtain(PhysicsActor.class);
+                player = Pools.obtain(PhysicalActor.class);
                 player.set(1, 1, 4, 50, 40);
 
                 actors.add(player);
