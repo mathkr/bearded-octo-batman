@@ -56,7 +56,7 @@ public class PhysicsActor extends Actor {
         }
 
         @Override
-        public void deliver(int type, Event event) {
+        public void fireEvent(int type, Event event) {
                 switch(type) {
                         case Event.MOVE_EVENT:
                                 VectorEvent e = (VectorEvent)event;
