@@ -1,13 +1,11 @@
 package de.wizard.model;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.DelayedRemovalArray;
 import com.badlogic.gdx.utils.Pools;
-import de.wizard.Main;
-import de.wizard.event.Event;
-import de.wizard.event.VectorEvent;
 import de.wizard.util.QuadTree;
 
 public class Scene {
@@ -28,20 +26,49 @@ public class Scene {
 
                 player = Pools.obtain(PhysicalActor.class);
                 player.set(1, 1, 4, 50, 40);
-
                 actors.add(player);
+
+                PhysicalActor a = Pools.obtain(PhysicalActor.class);
+                a.set(bounds.width / 2, bounds.height / 2, 2, 0.2f, 5);
+
+                a.addModifier(new Modifier(a) {
+                        @Override
+                        public void modify(PhysicalActor actor) {
+                                actor.radius = 2 + Math.abs(MathUtils.sin(2 * time) * 10);
+                        }
+                });
+
+                a.addModifier(new Modifier(a) {
+                        @Override
+                        public void modify(PhysicalActor actor) {
+                                Vector2 vel = new Vector2(100, 100);
+                                vel.rotateRad(10 * time);
+                                actor.velocity.set(vel);
+                        }
+                });
+
+                a.addModifier(new Modifier(a) {
+                        @Override
+                        public void modify(PhysicalActor actor) {
+                                float sign = Math.signum(MathUtils.sin(time / 4));
+                                actor.velocity.add(0, 10 * sign);
+                        }
+                });
+
+                actors.add(a);
         }
 
         public void update() {
-                handleInput();
-
+                /* Rebuild the quadtree */
                 tree.clear();
                 for (Actor actor : actors) {
                         tree.insert(actor);
                 }
 
+                /* Set delta to be used by actors to allow for easy manipulation */
                 delta = Gdx.graphics.getDeltaTime();
 
+                /* Update all actors */
                 actors.begin();
                 for (Actor actor : actors) {
                         actor.update();
@@ -54,22 +81,5 @@ public class Scene {
          */
         public float getFriction(float x, float y, float v) {
                 return v > 0.001f ? 0.8f : 1.0f;
-        }
-
-        public void handleInput() {
-                float x = 0, y = 0;
-
-                if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
-                        x -= 1;
-                if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
-                        x += 1;
-                if (Gdx.input.isKeyPressed(Input.Keys.DOWN))
-                        y -= 1;
-                if (Gdx.input.isKeyPressed(Input.Keys.UP))
-                        y += 1;
-
-                VectorEvent e = Pools.obtain(VectorEvent.class);
-                e.set(this, x, y);
-                Main.eventManager.dispatchEvent(Event.MOVE_EVENT, e, player.getListenerId());
         }
 }

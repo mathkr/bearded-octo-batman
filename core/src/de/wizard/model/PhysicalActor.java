@@ -1,19 +1,25 @@
 package de.wizard.model;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 import de.wizard.Main;
 import de.wizard.event.Event;
 import de.wizard.event.VectorEvent;
 
 public class PhysicalActor extends Actor {
-        private Vector2 velocity;
-        private Vector2 force;
-        private Vector2 acceleration;
+        public Vector2 velocity;
+        public Vector2 force;
+        public Vector2 acceleration;
 
-        private float mass;
-        private float friction;
+        public float mass;
+        public float friction;
+
+        private Array<Modifier> modifiers;
 
         public PhysicalActor() {
+                modifiers = new Array<>();
                 velocity = new Vector2();
                 force = new Vector2();
                 acceleration = new Vector2();
@@ -21,7 +27,20 @@ public class PhysicalActor extends Actor {
 
         @Override
         public void update() {
+                updateModifiers();
                 move();
+        }
+
+        private void updateModifiers() {
+                modifiers.forEach(m -> m.update(Main.scene.delta));
+        }
+
+        public void addModifier(Modifier modifier) {
+                modifiers.add(modifier);
+        }
+
+        public void removeModifier(Modifier modifier) {
+                modifiers.removeValue(modifier, true);
         }
 
         protected void move() {
@@ -53,6 +72,13 @@ public class PhysicalActor extends Actor {
                 /* Calculate new position */
                 x += velocity.x * delta;
                 y += velocity.y * delta;
+
+                /* Scene bounds corrections */
+                x = x > Main.scene.bounds.width ? Main.scene.bounds.width : x;
+                x = x < 0 ? 0 : x;
+
+                y = y > Main.scene.bounds.height ? Main.scene.bounds.height : y;
+                y = y < 0 ? 0 : y;
         }
 
         @Override
@@ -79,6 +105,8 @@ public class PhysicalActor extends Actor {
         public void reset() {
                 super.reset();
 
+                modifiers.clear();
+
                 velocity.setZero();
                 force.setZero();
                 acceleration.setZero();
@@ -89,6 +117,7 @@ public class PhysicalActor extends Actor {
 
         public void set(float x, float y, float radius, float mass, float friction) {
                 super.set(x, y, radius);
+
                 this.mass = mass;
                 this.friction = friction;
         }

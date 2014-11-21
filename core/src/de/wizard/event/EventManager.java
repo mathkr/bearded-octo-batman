@@ -26,7 +26,8 @@ public class EventManager {
                 eventListener.remove(listener.getListenerId());
         }
 
-        public void processEvents() {
+        public void update() {
+                /* Process pending events */
                 pendingEventsQueue.begin();
                 for (EventEntry entry : pendingEventsQueue) {
                         if (entry.waitTime == 0 || TimeUtils.timeSinceMillis(entry.originTime) >= entry.waitTime) {
